@@ -64,7 +64,6 @@ export interface ScriptContext {
 }
 
 export interface Script {
-    id: string;
     name?: string;
     description?: string;
     version?: string;
