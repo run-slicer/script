@@ -31,7 +31,7 @@ export interface RadioOption extends Option {
     selected: string; // id
 }
 
-export type EventType = "option_change" | "disasm";
+export type EventType = "option_change" | "preload";
 
 export interface Event {
     type: EventType;
@@ -44,20 +44,14 @@ export interface OptionChangeEvent extends Event {
     option: Option;
 }
 
-export interface Disassembler {
-    id: string;
-    label?: string;
-}
-
-export interface DisassembleEvent extends Event {
-    type: "disasm";
-    disasm: Disassembler;
+export interface PreloadEvent extends Event {
+    type: "preload";
     data: Uint8Array;
 }
 
 interface EventMap {
     option_change: OptionChangeEvent;
-    disasm: DisassembleEvent;
+    preload: PreloadEvent;
 }
 
 export interface ScriptContext {
@@ -75,6 +69,6 @@ export interface Script {
     version?: string;
     options?: Option[];
 
-    load?: (context: ScriptContext) => void | Promise<void>;
-    unload?: (context: ScriptContext) => void | Promise<void>;
+    load(context: ScriptContext): void | Promise<void>;
+    unload(context: ScriptContext): void | Promise<void>;
 }
