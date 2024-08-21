@@ -49,14 +49,30 @@ export interface PreloadEvent extends Event {
     data: Uint8Array;
 }
 
-interface EventMap {
+export interface EventMap {
     option_change: OptionChangeEvent;
     preload: PreloadEvent;
+}
+
+export type TabType = "unspecific" | "welcome" | "code" | "hex" | "flow_graph";
+
+export interface Tab {
+    type: TabType;
+    id: string;
+    label: string;
+}
+
+export interface EditorContext {
+    tabs(): Tab[];
+    current(): Tab | null;
+    refresh(id: string): void;
 }
 
 export interface ScriptContext {
     script: Script;
     parent: ScriptContext | null;
+
+    editor: EditorContext;
 
     addEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
     removeEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
