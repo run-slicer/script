@@ -54,12 +54,20 @@ export interface EventMap {
     preload: PreloadEvent;
 }
 
+export type EntryType = "unspecific" | "class";
+
+export interface Entry {
+    type: EntryType;
+    name: string;
+}
+
 export type TabType = "unspecific" | "welcome" | "code" | "hex" | "flow_graph";
 
 export interface Tab {
     type: TabType;
     id: string;
     label: string;
+    entry: Entry | null;
 }
 
 export interface EditorContext {
