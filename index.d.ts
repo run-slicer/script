@@ -73,8 +73,9 @@ export interface Tab {
 
 export interface EditorContext {
     tabs(): Tab[];
+    find(id: string): Tab | null;
     current(): Tab | null;
-    refresh(id: string): void;
+    refresh(id: string, hard: boolean): Promise<void>;
 }
 
 export interface ScriptContext {
