@@ -46,6 +46,7 @@ export interface OptionChangeEvent extends Event {
 
 export interface PreloadEvent extends Event {
     type: "preload";
+    name: string;
     data: Uint8Array;
 }
 
