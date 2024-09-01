@@ -78,11 +78,27 @@ export interface EditorContext {
     refresh(id: string, hard: boolean): Promise<void>;
 }
 
+export interface Disassembler {
+    id: string;
+    label: string;
+    language?: string; // internal language ID, arbitrary
+
+    run(data: Uint8Array): Promise<string>;
+}
+
+export interface DisassemblerContext {
+    all(): Disassembler[];
+    find(id: string): Disassembler | null;
+    add(disasm: Disassembler): void;
+    remove(id: string): void;
+}
+
 export interface ScriptContext {
     script: Script;
     parent: ScriptContext | null;
 
     editor: EditorContext;
+    disasm: DisassemblerContext;
 
     addEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
     removeEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
