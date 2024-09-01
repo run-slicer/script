@@ -80,10 +80,10 @@ export interface EditorContext {
 
 export interface Disassembler {
     id: string;
-    label: string;
+    label?: string;
     language?: string; // internal language ID, arbitrary
 
-    run(data: Uint8Array): Promise<string>;
+    run(data: Uint8Array): string | Promise<string>;
 }
 
 export interface DisassemblerContext {

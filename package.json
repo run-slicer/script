@@ -1,6 +1,6 @@
 {
     "name": "@run-slicer/script",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "author": "run-slicer",
     "license": "MIT",
     "description": "Type definitions for the slicer scripting API.",
