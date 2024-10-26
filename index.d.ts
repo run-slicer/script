@@ -1,3 +1,5 @@
+type Awaitable<T> = T | PromiseLike<T>;
+
 export type OptionType = "group" | "button" | "checkbox" | "radio";
 
 export interface Option {
@@ -37,7 +39,7 @@ export interface Event {
     type: EventType;
 }
 
-export type EventListener<E extends Event> = (event: E, context: ScriptContext) => void | Promise<void>;
+export type EventListener<E extends Event> = (event: E, context: ScriptContext) => Awaitable<void>;
 
 export interface OptionChangeEvent extends Event {
     type: "option_change";
@@ -55,14 +57,14 @@ export interface EventMap {
     preload: PreloadEvent;
 }
 
-export type EntryType = "unspecific" | "class";
+export type EntryType = "unspecific" | "class" | "archive";
 
 export interface Entry {
     type: EntryType;
     name: string;
 }
 
-export type TabType = "unspecific" | "welcome" | "code" | "hex" | "flow_graph";
+export type TabType = "unspecific" | "welcome" | "code" | "hex" | "flow_graph" | "image";
 
 export interface Tab {
     type: TabType;
@@ -75,7 +77,7 @@ export interface EditorContext {
     tabs(): Tab[];
     find(id: string): Tab | null;
     current(): Tab | null;
-    refresh(id: string, hard: boolean): Promise<void>;
+    refresh(id: string, hard: boolean): Awaitable<void>;
 }
 
 export interface Disassembler {
@@ -83,7 +85,7 @@ export interface Disassembler {
     label?: string;
     language?: string; // internal language ID, arbitrary
 
-    run(data: Uint8Array): string | Promise<string>;
+    run(data: Uint8Array): Awaitable<string>;
 }
 
 export interface DisassemblerContext {
@@ -102,7 +104,7 @@ export interface ScriptContext {
 
     addEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
     removeEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
-    dispatchEvent<E extends Event>(event: E): Promise<E>;
+    dispatchEvent<E extends Event>(event: E): Awaitable<E>;
 }
 
 export interface Script {
@@ -111,6 +113,6 @@ export interface Script {
     version?: string;
     options?: Option[];
 
-    load(context: ScriptContext): void | Promise<void>;
-    unload(context: ScriptContext): void | Promise<void>;
+    load(context: ScriptContext): Awaitable<void>;
+    unload(context: ScriptContext): Awaitable<void>;
 }
