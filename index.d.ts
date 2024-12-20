@@ -80,12 +80,15 @@ export interface EditorContext {
     refresh(id: string, hard: boolean): Awaitable<void>;
 }
 
+export type ClassDataSource = (name: string) => Awaitable<Uint8Array | null>;
+
 export interface Disassembler {
     id: string;
     label?: string;
     language?: string; // internal language ID, arbitrary
 
-    run(data: Uint8Array): Awaitable<string>;
+    class: (name: string, source: ClassDataSource) => Awaitable<string>;
+    method?: (name: string, signature: string, source: ClassDataSource) => Awaitable<string>;
 }
 
 export interface DisassemblerContext {
