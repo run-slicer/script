@@ -90,6 +90,7 @@ export interface Disassembler {
     id: string;
     label?: string;
     language?: string;
+    options?: Record<string, string>;
 
     class: (name: string, source: ClassDataSource) => Awaitable<string>;
     method?: (name: string, signature: string, source: ClassDataSource) => Awaitable<string>;
