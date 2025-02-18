@@ -57,19 +57,20 @@ export interface EventMap {
     preload: PreloadEvent;
 }
 
-export type EntryType = "unspecific" | "class" | "archive";
-
 export interface Entry {
-    type: EntryType;
+    type: string;
     name: string;
+
+    bytes(): Awaitable<Uint8Array>;
+    blob(): Awaitable<Blob>;
 }
 
-export type TabType = "unspecific" | "welcome" | "code" | "hex" | "flow_graph" | "image";
-
 export interface Tab {
-    type: TabType;
+    type: string;
     id: string;
     label: string;
+    position: string;
+    active: boolean;
     entry: Entry | null;
 }
 
@@ -77,7 +78,10 @@ export interface EditorContext {
     tabs(): Tab[];
     find(id: string): Tab | null;
     current(): Tab | null;
-    refresh(id: string, hard: boolean): Awaitable<void>;
+    refresh(id: string, hard?: boolean): Awaitable<void>;
+    add(type: string, entry?: Entry): Awaitable<Tab>;
+    remove(id: string): void;
+    clear(): void;
 }
 
 export type ClassDataSource = (name: string) => Awaitable<Uint8Array | null>;
@@ -85,7 +89,7 @@ export type ClassDataSource = (name: string) => Awaitable<Uint8Array | null>;
 export interface Disassembler {
     id: string;
     label?: string;
-    language?: string; // internal language ID, arbitrary
+    language?: string;
 
     class: (name: string, source: ClassDataSource) => Awaitable<string>;
     method?: (name: string, signature: string, source: ClassDataSource) => Awaitable<string>;
@@ -98,12 +102,21 @@ export interface DisassemblerContext {
     remove(id: string): void;
 }
 
+export interface WorkspaceContext {
+    entries(): Entry[];
+    find(name: string): Entry | null;
+    add(name: string, data: Uint8Array | Blob): Awaitable<Entry>;
+    remove(name: string): void;
+    clear(): void;
+}
+
 export interface ScriptContext {
     script: Script;
     parent: ScriptContext | null;
 
     editor: EditorContext;
     disasm: DisassemblerContext;
+    workspace: WorkspaceContext;
 
     addEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
     removeEventListener<K extends EventType>(type: K, listener: EventListener<EventMap[K]>): void;
