@@ -89,6 +89,7 @@ export type ClassDataSource = (name: string) => Awaitable<Uint8Array | null>;
 export interface Disassembler {
     id: string;
     label?: string;
+    version?: string;
     language?: string;
     options?: Record<string, string>;
 
