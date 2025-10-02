@@ -115,16 +115,16 @@ export interface OptionChangeEvent extends Event {
 }
 
 /**
- * An event emitted when a workspace entry is to be interpreted (read) in a tab.
+ * An event emitted when a class file is to be interpreted (read) in a tab.
  */
 export interface PreloadEvent extends Event {
     readonly type: "preload";
     /**
-     * The name of the entry being loaded ({@link Entry#name}).
+     * The name of *the workspace entry* being loaded ({@link Entry#name}).
      */
     readonly name: string;
     /**
-     * The *transformed* raw data of the entry being loaded ({@link Entry#bytes}), mutable.
+     * The *transformed* raw bytecode of the class file, mutable.
      */
     data: Uint8Array;
 }
