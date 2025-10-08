@@ -284,9 +284,10 @@ export interface Disassembler {
      * This function must be implemented by the disassembler.
      * @param name The fully qualified name of the class to disassemble (e.g. "com/example/HelloWorld").
      * @param source A function that provides the raw bytecode of a class by its name.
+     * @param resources An array of fully qualified class names that may be requested from the {@link ClassDataSource} (e.g. "java/lang/Object").
      * @returns The disassembled code as a string.
      */
-    readonly class: (name: string, source: ClassDataSource) => Awaitable<string>;
+    readonly class: (name: string, source: ClassDataSource, resources: string[]) => Awaitable<string>;
     /**
      * Disassembles a method by its name and signature using the provided data source to fetch the raw bytecode of the containing class.
      *
@@ -294,9 +295,15 @@ export interface Disassembler {
      * @param name The fully qualified name of the class containing the method (e.g. "com/example/HelloWorld").
      * @param signature The method signature (e.g. "main([Ljava/lang/String;)V").
      * @param source A function that provides the raw bytecode of a class by its name.
+     * @param resources An array of fully qualified class names that may be requested from the {@link ClassDataSource} (e.g. "java/lang/Object").
      * @returns The disassembled method code as a string.
      */
-    readonly method?: (name: string, signature: string, source: ClassDataSource) => Awaitable<string>;
+    readonly method?: (
+        name: string,
+        signature: string,
+        source: ClassDataSource,
+        resources: string[]
+    ) => Awaitable<string>;
 }
 
 /**
