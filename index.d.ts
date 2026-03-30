@@ -372,6 +372,44 @@ export interface WorkspaceContext {
 }
 
 /**
+ * Mapping formats supported by slicer for loading and exporting mappings.
+ *
+ * This may be updated in the future to include additional formats.
+ */
+export type MappingType = "tiny_v1" | "tiny_v2" | "proguard" | "srg" | "csrg" | "tsrg";
+
+/**
+ * The mapping context, which allows loading and exporting mappings in supported formats.
+ */
+export interface MappingContext {
+    /**
+     * Loads mappings from a string in a supported format, optionally specifying the destination namespace for formats that support it (e.g. tiny).
+     *
+     * @param data The mapping data as a string.
+     * @param dst The destination namespace to use when loading mappings, if applicable (e.g. "named"). If not specified, the first namespace after the source namespace will be used by default.
+     */
+    load(data: string, dst?: string): Awaitable<void>;
+
+    /**
+     * Exports the currently loaded mappings to a string in the specified format.
+     *
+     * @param format The format to export the mappings in.
+     * @returns The exported mappings as a string.
+     */
+    export(format: MappingType): Awaitable<string>;
+
+    /**
+     * Returns the number of mapped classes currently loaded in the mapping set.
+     */
+    size(): number;
+
+    /**
+     * Clears all loaded mappings from the mapping set.
+     */
+    clear(): void;
+}
+
+/**
  * The context in which a script is executed, providing access to the editor, disassembler, and workspace contexts,
  * as well as event handling capabilities.
  */
@@ -397,6 +435,10 @@ export interface ScriptContext {
      * The workspace context, which allows interaction with the entries in the workspace.
      */
     workspace: WorkspaceContext;
+    /**
+     * The mapping context, which allows loading and exporting mappings in supported formats.
+     */
+    mapping: MappingContext;
 
     /**
      * Adds an event listener for the specified event type.
