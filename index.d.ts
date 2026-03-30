@@ -383,12 +383,13 @@ export type MappingType = "tiny_v1" | "tiny_v2" | "proguard" | "srg" | "csrg" | 
  */
 export interface MappingContext {
     /**
-     * Loads mappings from a string in a supported format, optionally specifying the destination namespace for formats that support it (e.g. tiny).
+     * Loads mappings from a string in a supported format, optionally specifying the source and destination namespace for formats that support it (e.g. tiny).
      *
      * @param data The mapping data as a string.
+     * @param src The source namespace to use when loading mappings, if applicable (e.g. "intermediary"). If not specified, the first namespace in the mapping file will be used by default.
      * @param dst The destination namespace to use when loading mappings, if applicable (e.g. "named"). If not specified, the first namespace after the source namespace will be used by default.
      */
-    load(data: string, dst?: string): Awaitable<void>;
+    load(data: string, src?: string, dst?: string): Awaitable<void>;
 
     /**
      * Exports the currently loaded mappings to a string in the specified format.
