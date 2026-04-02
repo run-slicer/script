@@ -3,16 +3,25 @@ type Awaitable<T> = T | PromiseLike<T>;
 /**
  * A type of {@link Option}.
  */
-export type OptionType = "group" | "button" | "checkbox" | "radio";
+export type OptionType = "group" | "button" | "checkbox" | "radio" | "separator";
 
 /**
- * An option that can be configured by the user in the script's menu (Scripts -> <script name> -> <option name>).
+ * An option in the menubar that can be configured by the user.
  */
 export interface Option {
     /**
      * The type of the option.
      */
     readonly type: OptionType;
+    /**
+     * The position of the option in the menubar, e.g. "menu.root", "menu.file", etc.
+     *
+     * This can be a translation key or a hardcoded string.
+     *
+     * The options will be added at the end of the specified menu, in the order they are defined in the script.
+     * If the position is invalid, a new menu will be created with the given name and the option will be added to it.
+     */
+    readonly position: string;
     /**
      * The unique identifier of the option.
      */
@@ -84,7 +93,7 @@ export interface RadioOption extends Option {
 /**
  * A type of {@link Event}.
  */
-export type EventType = "option_change" | "preload";
+export type EventType = "option_change" | "locale_change" | "preload";
 
 /**
  * An event emitted onto an event bus.
@@ -115,6 +124,17 @@ export interface OptionChangeEvent extends Event {
 }
 
 /**
+ * An event emitted when the UI locale changes.
+ */
+export interface LocaleChangeEvent extends Event {
+    readonly type: "locale_change";
+    /**
+     * The new locale after the change.
+     */
+    readonly locale: string;
+}
+
+/**
  * An event emitted when a class file is to be interpreted (read) in a tab.
  */
 export interface PreloadEvent extends Event {
@@ -134,6 +154,7 @@ export interface PreloadEvent extends Event {
  */
 export interface EventMap {
     option_change: OptionChangeEvent;
+    locale_change: LocaleChangeEvent;
     preload: PreloadEvent;
 }
 
@@ -411,6 +432,37 @@ export interface MappingContext {
 }
 
 /**
+ * Provides access to internationalization (i18n) features, such as translating strings based on the user's locale.
+ */
+export interface I18NContext {
+    /**
+     * Current locale of the user, represented as a string (e.g. "en", "es", etc.).
+     */
+    readonly locale: string;
+
+    /**
+     * Translates a string key into the user's locale, optionally formatting it with provided arguments.
+     *
+     * @param key The key of the string to translate, defined in slicer's i18n files (e.g. "menu.file", ...).
+     * @param args Optional arguments to format the translated string with, if it contains placeholders.
+     * @returns The translated and formatted string.
+     */
+    t(key: string, ...args: any[]): string;
+
+    /**
+     * Registers a new translation for a specific locale, allowing scripts to provide their own localized strings.
+     *
+     * If a translation for the same locale and key already exists, it will be overwritten by the new value.
+     * If the locale does not exist yet, it will be created and the translation will be added to it.
+     *
+     * @param locale The locale to register the translation for, represented as a string (e.g. "en", "es", etc.).
+     * @param key The key of the string to register the translation for, can be any string but should ideally follow the same format as keys in slicer's i18n files (e.g. "menu.file", ...).
+     * @param value The translated string in the specified locale.
+     */
+    register(locale: string, key: string, value: string): void;
+}
+
+/**
  * The context in which a script is executed, providing access to the editor, disassembler, and workspace contexts,
  * as well as event handling capabilities.
  */
@@ -418,28 +470,32 @@ export interface ScriptContext {
     /**
      * The script associated with this context.
      */
-    script: Script;
+    readonly script: Script;
     /**
      * The parent context, or `null` if this is the root context.
      */
-    parent: ScriptContext | null;
+    readonly parent: ScriptContext | null;
 
     /**
      * The editor context, which allows interaction with the tabs in the UI.
      */
-    editor: EditorContext;
+    readonly editor: EditorContext;
     /**
      * The disassembler context, which allows interaction with the available disassemblers.
      */
-    disasm: DisassemblerContext;
+    readonly disasm: DisassemblerContext;
     /**
      * The workspace context, which allows interaction with the entries in the workspace.
      */
-    workspace: WorkspaceContext;
+    readonly workspace: WorkspaceContext;
     /**
      * The mapping context, which allows loading and exporting mappings in supported formats.
      */
-    mapping: MappingContext;
+    readonly mapping: MappingContext;
+    /**
+     * The internationalization context, which allows translating strings based on the user's locale and registering new translations.
+     */
+    readonly i18n: I18NContext;
 
     /**
      * Adds an event listener for the specified event type.
