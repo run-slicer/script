@@ -573,7 +573,18 @@ export interface I18NContext {
      * @param key The key of the string to register the translation for, can be any string but should ideally follow the same format as keys in slicer's i18n files (e.g. "menu.file", ...).
      * @param value The translated string in the specified locale.
      */
-    register(locale: string, key: string, value: string): void;
+    add(locale: string, key: string, value: string): void;
+
+    /**
+     * Removes a translation for a specific locale and key.
+     *
+     * If the translation does not exist, this function does nothing.
+     * If the locale becomes empty after removing the translation, it will be removed as well.
+     *
+     * @param locale The locale of the translation to remove, represented as a string (e.g. "en", "es", etc.).
+     * @param key The key of the translation to remove.
+     */
+    remove(locale: string, key: string): void;
 }
 
 /**
