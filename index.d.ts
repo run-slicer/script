@@ -24,6 +24,9 @@ export interface Option {
     readonly position: string;
     /**
      * The unique identifier of the option.
+     *
+     * This should not conflict with IDs of options defined by other scripts, to ensure compatibility with other scripts,
+     * so it is recommended to use a namespaced ID (e.g. "my_script/enable_feature", "my_script/refresh_cache", etc.).
      */
     readonly id: string;
     /**
@@ -215,6 +218,102 @@ export interface Tab {
 }
 
 /**
+ * A type of icon that can be displayed in a tab.
+ */
+export type IconType = "url" | "html";
+
+/**
+ * An icon in the UI.
+ */
+export interface Icon {
+    /**
+     * The type of the icon, which determines how the value is interpreted.
+     */
+    readonly type: IconType;
+
+    /**
+     * The value of the icon, which can be a URL to an image if the type is "url", or an HTML string if the type is "html".
+     */
+    readonly value: string;
+}
+
+/**
+ * Values provided during the rendering of a tab, which can be used to customize the content based on the associated entry or other factors.
+ */
+export interface TabContext {
+    /**
+     * The script context in which the tab is being rendered.
+     */
+    readonly context: ScriptContext;
+
+    /**
+     * The entry opened in the tab, or `null` if the tab is not associated with any entry.
+     */
+    readonly entry: Entry | null;
+}
+
+/**
+ * The content and placement of a tab in the UI provided by the script.
+ */
+export interface TabPlacement {
+    /**
+     * A human-readable name or a translation key for the tab's label (e.g. "HelloWorld.class", "Welcome", etc.).
+     */
+    label: string;
+    /**
+     * The element to mount in the tab's content area, which can be any valid HTML element created by the script.
+     */
+    content: Element;
+
+    /**
+     * The position of the tab in the UI, defined in slicer internally (e.g. "primary_center", "secondary_left", etc.).
+     *
+     * Defaults to "primary_center" if not specified, which is the main area where tabs are usually opened.
+     */
+    position?: string;
+
+    /**
+     * An optional function that is called when the tab is closed, allowing for cleanup of any resources or state associated with the tab.
+     */
+    destroy?(): Awaitable<void>;
+}
+
+/**
+ * The declaration of a type of tab that can be rendered in the UI.
+ */
+export interface TabDeclaration {
+    /**
+     * The unique ID of the tab declaration.
+     *
+     * This should not conflict with types of tabs defined by slicer internally or by other scripts, to ensure compatibility with other scripts and future versions of slicer,
+     * so it is recommended to use a namespaced type (e.g. "my_script/code", "my_script/graph", etc.).
+     */
+    readonly id: string;
+    /**
+     * An icon for the tab.
+     */
+    readonly icon: Icon;
+    /**
+     * Whether the tab is contextual, meaning that it should only be rendered when there is an associated entry (i.e. when the {@link TabContext#entry} is not `null`).
+     *
+     * If `false`, the tab will be rendered without an associated entry, and the {@link TabContext#entry} will be `null` in that case.
+     * This can be useful for tabs that display general information or a welcome screen, for example.
+     *
+     * Defaults to `false`.
+     */
+    readonly contextual?: boolean;
+
+    /**
+     * Renders the content of the tab based on the provided context.
+     * The returned {@link TabPlacement} specifies the content to display in the tab and its position in the UI.
+     *
+     * @param context The context for rendering the tab.
+     * @return An object containing the content to display in the tab.
+     */
+    render(context: TabContext): Awaitable<TabPlacement>;
+}
+
+/**
  * The editor context, which allows interaction with the tabs in the UI.
  */
 export interface EditorContext {
@@ -265,6 +364,21 @@ export interface EditorContext {
      * Removes all tabs from the UI.
      */
     clear(): void;
+
+    /**
+     * Registers a new type of tab that can be added to the UI.
+     *
+     * @param declaration The declaration of the tab type, including its unique ID, icon, and render function.
+     */
+    register(declaration: TabDeclaration): void;
+
+    /**
+     * Unregisters a type of tab, preventing any new tabs of that type from being added to the UI.
+     * Existing tabs of that type will be closed automatically, and any attempt to add a new tab of that type will fail until it is registered again.
+     *
+     * @param id The unique identifier of the tab type to unregister.
+     */
+    unregister(id: string): void;
 }
 
 /**
