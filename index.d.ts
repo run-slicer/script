@@ -20,8 +20,10 @@ export interface Option {
      *
      * The options will be added at the end of the specified menu, in the order they are defined in the script.
      * If the position is invalid, a new menu will be created with the given name and the option will be added to it.
+     *
+     * If the position is not specified, it will be added to the script's submenu.
      */
-    readonly position: string;
+    readonly position?: string;
     /**
      * The unique identifier of the option.
      *
@@ -30,7 +32,7 @@ export interface Option {
      */
     readonly id: string;
     /**
-     * A human-readable name for the option, defaults to {@link id} if not provided.
+     * A human-readable name or a translation key for the option, defaults to {@link id} if not provided.
      */
     readonly label?: string;
 }
