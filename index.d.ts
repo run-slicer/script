@@ -244,7 +244,7 @@ export interface Tab {
 }
 
 /**
- * Values provided during the rendering of a tab, which can be used to customize the content based on the associated entry or other factors.
+ * Values provided during the placement and rendering of a tab, which can be used to customize the content based on the associated entry or other factors.
  */
 export interface TabContext {
     /**
@@ -259,24 +259,23 @@ export interface TabContext {
 }
 
 /**
- * The content and placement of a tab in the UI provided by the script.
+ * The placement of a tab in the UI provided by the script.
  */
 export interface TabPlacement {
     /**
      * A human-readable name or a translation key for the tab's label (e.g. "HelloWorld.class", "Welcome", etc.).
      */
     label: string;
+}
+
+/**
+ * The content of a tab in the UI provided by the script.
+ */
+export interface TabContent {
     /**
      * The element to mount in the tab's content area, which can be any valid HTML element created by the script.
      */
     content: Element;
-
-    /**
-     * The position of the tab in the UI, defined in slicer internally (e.g. "primary_center", "secondary_left", etc.).
-     *
-     * Defaults to "primary_center" if not specified, which is the main area where tabs are usually opened.
-     */
-    position?: string;
 
     /**
      * An optional function that is called when the tab is closed, allowing for cleanup of any resources or state associated with the tab.
@@ -310,13 +309,21 @@ export interface TabDeclaration {
     readonly contextual?: boolean;
 
     /**
+     * Determines the placement of the tab in the UI based on the provided context.
+     *
+     * @param context The context for placing the tab, which includes the associated entry if applicable.
+     * @return An object containing tab placement.
+     */
+    place(context: TabContext): Awaitable<TabPlacement>;
+
+    /**
      * Renders the content of the tab based on the provided context.
-     * The returned {@link TabPlacement} specifies the content to display in the tab and its position in the UI.
+     * The returned {@link TabContent} specifies the content to display in the tab and its position in the UI.
      *
      * @param context The context for rendering the tab.
      * @return An object containing the content to display in the tab.
      */
-    render(context: TabContext): Awaitable<TabPlacement>;
+    render(context: TabContext): Awaitable<TabContent>;
 }
 
 /**
