@@ -264,8 +264,15 @@ export interface TabContext {
 export interface TabPlacement {
     /**
      * A human-readable name or a translation key for the tab's label (e.g. "HelloWorld.class", "Welcome", etc.).
+     *
+     * Defaults to the name of the associated entry if there is one, or the tab type if there is no associated entry.
      */
-    label: string;
+    readonly label?: string;
+
+    /**
+     * An optional icon to display next to the tab's label in the UI.
+     */
+    readonly icon?: Icon;
 }
 
 /**
@@ -275,7 +282,7 @@ export interface TabContent {
     /**
      * The element to mount in the tab's content area, which can be any valid HTML element created by the script.
      */
-    content: HTMLElement;
+    readonly content: HTMLElement;
 
     /**
      * An optional function that is called when the tab is closed, allowing for cleanup of any resources or state associated with the tab.
