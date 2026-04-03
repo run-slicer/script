@@ -265,7 +265,7 @@ export interface TabPlacement {
     /**
      * A human-readable name or a translation key for the tab's label (e.g. "HelloWorld.class", "Welcome", etc.).
      *
-     * Defaults to the name of the associated entry if there is one, or the tab type if there is no associated entry.
+     * Defaults to the name of the associated entry if there is one, or the default label if there is no associated entry.
      */
     readonly label?: string;
 
@@ -301,6 +301,12 @@ export interface TabDeclaration {
      * so it is recommended to use a namespaced type (e.g. "my_script/code", "my_script/graph", etc.).
      */
     readonly id: string;
+    /**
+     * A human-readable name or a translation key for the tab's label.
+     *
+     * This will be used as the label for any "Open as" buttons.
+     */
+    readonly label: string;
     /**
      * An icon for the tab.
      */
