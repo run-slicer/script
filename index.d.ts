@@ -314,6 +314,13 @@ export interface TabDeclaration {
      * Defaults to `false`.
      */
     readonly contextual?: boolean;
+    /**
+     * An optional array of file extensions (without the dot) that this tab can handle, which can be used by slicer to determine which tab declaration to use for a given entry.
+     *
+     * This is only a hint, a tab must be able to handle any entry passed to it in the {@link TabContext#entry} regardless of the file extension.
+     * This only applies if {@link TabDeclaration#contextual} is true.
+     */
+    readonly preferredTypes?: string[];
 
     /**
      * Determines the placement of the tab in the UI based on the provided context.
