@@ -1,6 +1,26 @@
 type Awaitable<T> = T | PromiseLike<T>;
 
 /**
+ * A type of icon that can be displayed in a tab.
+ */
+export type IconType = "url" | "html";
+
+/**
+ * An icon in the UI.
+ */
+export interface Icon {
+    /**
+     * The type of the icon, which determines how the value is interpreted.
+     */
+    readonly type: IconType;
+
+    /**
+     * The value of the icon, which can be a URL to an image if the type is "url", or an HTML string if the type is "html".
+     */
+    readonly value: string;
+}
+
+/**
  * A type of {@link Option}.
  */
 export type OptionType = "group" | "button" | "checkbox" | "radio" | "separator";
@@ -35,6 +55,10 @@ export interface Option {
      * A human-readable name or a translation key for the option, defaults to {@link id} if not provided.
      */
     readonly label?: string;
+    /**
+     * An optional icon to display next to the option in the menu.
+     */
+    readonly icon?: Icon;
 }
 
 /**
@@ -217,26 +241,6 @@ export interface Tab {
      * The entry opened in the tab, or `null` if the tab is not associated with any entry (e.g. a welcome tab).
      */
     readonly entry: Entry | null;
-}
-
-/**
- * A type of icon that can be displayed in a tab.
- */
-export type IconType = "url" | "html";
-
-/**
- * An icon in the UI.
- */
-export interface Icon {
-    /**
-     * The type of the icon, which determines how the value is interpreted.
-     */
-    readonly type: IconType;
-
-    /**
-     * The value of the icon, which can be a URL to an image if the type is "url", or an HTML string if the type is "html".
-     */
-    readonly value: string;
 }
 
 /**
