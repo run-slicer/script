@@ -275,7 +275,7 @@ export interface TabContent {
     /**
      * The element to mount in the tab's content area, which can be any valid HTML element created by the script.
      */
-    content: Element;
+    content: HTMLElement;
 
     /**
      * An optional function that is called when the tab is closed, allowing for cleanup of any resources or state associated with the tab.
