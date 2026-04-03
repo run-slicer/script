@@ -394,7 +394,9 @@ export interface EditorContext {
 
     /**
      * Unregisters a type of tab, preventing any new tabs of that type from being added to the UI.
-     * Existing tabs of that type will be closed automatically, and any attempt to add a new tab of that type will fail until it is registered again.
+     * Existing tabs of that type will not be closed automatically,
+     * existing tabs of that type will continue to function as normal until they are closed or refreshed,
+     * at which point they will no longer be able to render content and will display an error message instead.
      *
      * @param id The unique identifier of the tab type to unregister.
      */
