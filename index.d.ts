@@ -1,12 +1,32 @@
 type Awaitable<T> = T | PromiseLike<T>;
 
 /**
- * A type of {@link Option}.
+ * A type of icon that can be displayed in a tab.
  */
-export type OptionType = "group" | "button" | "checkbox" | "radio";
+export type IconType = "url" | "html";
 
 /**
- * An option that can be configured by the user in the script's menu (Scripts -> <script name> -> <option name>).
+ * An icon in the UI.
+ */
+export interface Icon {
+    /**
+     * The type of the icon, which determines how the value is interpreted.
+     */
+    readonly type: IconType;
+
+    /**
+     * The value of the icon, which can be a URL to an image if the type is "url", or an HTML string if the type is "html".
+     */
+    readonly value: string;
+}
+
+/**
+ * A type of {@link Option}.
+ */
+export type OptionType = "group" | "button" | "checkbox" | "radio" | "separator";
+
+/**
+ * An option in the menubar that can be configured by the user.
  */
 export interface Option {
     /**
@@ -14,13 +34,31 @@ export interface Option {
      */
     readonly type: OptionType;
     /**
+     * The position of the option in the menubar, e.g. "menu.root", "menu.file", etc.
+     *
+     * This can be a translation key or a hardcoded string.
+     *
+     * The options will be added at the end of the specified menu, in the order they are defined in the script.
+     * If the position is invalid, a new menu will be created with the given name and the option will be added to it.
+     *
+     * If the position is not specified, it will be added to the script's submenu.
+     */
+    readonly position?: string;
+    /**
      * The unique identifier of the option.
+     *
+     * This should not conflict with IDs of options defined by other scripts, to ensure compatibility with other scripts,
+     * so it is recommended to use a namespaced ID (e.g. "my_script/enable_feature", "my_script/refresh_cache", etc.).
      */
     readonly id: string;
     /**
-     * A human-readable name for the option, defaults to {@link id} if not provided.
+     * A human-readable name or a translation key for the option, defaults to {@link id} if not provided.
      */
     readonly label?: string;
+    /**
+     * An optional icon to display next to the option in the menu.
+     */
+    readonly icon?: Icon;
 }
 
 /**
@@ -84,7 +122,7 @@ export interface RadioOption extends Option {
 /**
  * A type of {@link Event}.
  */
-export type EventType = "option_change" | "preload";
+export type EventType = "option_change" | "locale_change" | "preload";
 
 /**
  * An event emitted onto an event bus.
@@ -115,6 +153,17 @@ export interface OptionChangeEvent extends Event {
 }
 
 /**
+ * An event emitted when the UI locale changes.
+ */
+export interface LocaleChangeEvent extends Event {
+    readonly type: "locale_change";
+    /**
+     * The new locale after the change.
+     */
+    readonly locale: string;
+}
+
+/**
  * An event emitted when a class file is to be interpreted (read) in a tab.
  */
 export interface PreloadEvent extends Event {
@@ -134,6 +183,7 @@ export interface PreloadEvent extends Event {
  */
 export interface EventMap {
     option_change: OptionChangeEvent;
+    locale_change: LocaleChangeEvent;
     preload: PreloadEvent;
 }
 
@@ -194,6 +244,109 @@ export interface Tab {
 }
 
 /**
+ * Values provided during the placement and rendering of a tab, which can be used to customize the content based on the associated entry or other factors.
+ */
+export interface TabContext {
+    /**
+     * The script context in which the tab is being rendered.
+     */
+    readonly context: ScriptContext;
+
+    /**
+     * The entry opened in the tab, or `null` if the tab is not associated with any entry.
+     */
+    readonly entry: Entry | null;
+}
+
+/**
+ * The placement of a tab in the UI provided by the script.
+ */
+export interface TabPlacement {
+    /**
+     * A human-readable name or a translation key for the tab's label (e.g. "HelloWorld.class", "Welcome", etc.).
+     *
+     * Defaults to the name of the associated entry if there is one, or the default label if there is no associated entry.
+     */
+    readonly label?: string;
+
+    /**
+     * An optional icon to display next to the tab's label in the UI.
+     */
+    readonly icon?: Icon;
+}
+
+/**
+ * The content of a tab in the UI provided by the script.
+ */
+export interface TabContent {
+    /**
+     * The element to mount in the tab's content area, which can be any valid HTML element created by the script.
+     */
+    readonly content: HTMLElement;
+
+    /**
+     * An optional function that is called when the tab is closed, allowing for cleanup of any resources or state associated with the tab.
+     */
+    destroy?(): Awaitable<void>;
+}
+
+/**
+ * The declaration of a type of tab that can be rendered in the UI.
+ */
+export interface TabDeclaration {
+    /**
+     * The unique ID of the tab declaration.
+     *
+     * This should not conflict with types of tabs defined by slicer internally or by other scripts, to ensure compatibility with other scripts and future versions of slicer,
+     * so it is recommended to use a namespaced type (e.g. "my_script/code", "my_script/graph", etc.).
+     */
+    readonly id: string;
+    /**
+     * A human-readable name or a translation key for the tab's label.
+     *
+     * This will be used as the label for any "Open as" buttons.
+     */
+    readonly label: string;
+    /**
+     * An icon for the tab.
+     */
+    readonly icon: Icon;
+    /**
+     * Whether the tab is contextual, meaning that it should only be rendered when there is an associated entry (i.e. when the {@link TabContext#entry} is not `null`).
+     *
+     * If `false`, the tab will be rendered without an associated entry, and the {@link TabContext#entry} will be `null` in that case.
+     * This can be useful for tabs that display general information or a welcome screen, for example.
+     *
+     * Defaults to `false`.
+     */
+    readonly contextual?: boolean;
+    /**
+     * An optional array of file extensions (without the dot) that this tab can handle, which can be used by slicer to determine which tab declaration to use for a given entry.
+     *
+     * This is only a hint, a tab must be able to handle any entry passed to it in the {@link TabContext#entry} regardless of the file extension.
+     * This only applies if {@link TabDeclaration#contextual} is true.
+     */
+    readonly preferredTypes?: string[];
+
+    /**
+     * Determines the placement of the tab in the UI based on the provided context.
+     *
+     * @param context The context for placing the tab, which includes the associated entry if applicable.
+     * @return An object containing tab placement.
+     */
+    place(context: TabContext): Awaitable<TabPlacement>;
+
+    /**
+     * Renders the content of the tab based on the provided context.
+     * The returned {@link TabContent} specifies the content to display in the tab and its position in the UI.
+     *
+     * @param context The context for rendering the tab.
+     * @return An object containing the content to display in the tab.
+     */
+    render(context: TabContext): Awaitable<TabContent>;
+}
+
+/**
  * The editor context, which allows interaction with the tabs in the UI.
  */
 export interface EditorContext {
@@ -244,6 +397,23 @@ export interface EditorContext {
      * Removes all tabs from the UI.
      */
     clear(): void;
+
+    /**
+     * Registers a new type of tab that can be added to the UI.
+     *
+     * @param declaration The declaration of the tab type, including its unique ID, icon, and render function.
+     */
+    register(declaration: TabDeclaration): void;
+
+    /**
+     * Unregisters a type of tab, preventing any new tabs of that type from being added to the UI.
+     * Existing tabs of that type will not be closed automatically,
+     * existing tabs of that type will continue to function as normal until they are closed or refreshed,
+     * at which point they will no longer be able to render content and will display an error message instead.
+     *
+     * @param id The unique identifier of the tab type to unregister.
+     */
+    unregister(id: string): void;
 }
 
 /**
@@ -411,6 +581,48 @@ export interface MappingContext {
 }
 
 /**
+ * Provides access to internationalization (i18n) features, such as translating strings based on the user's locale.
+ */
+export interface I18NContext {
+    /**
+     * Current locale of the user, represented as a string (e.g. "en", "es", etc.).
+     */
+    readonly locale: string;
+
+    /**
+     * Translates a string key into the user's locale, optionally formatting it with provided arguments.
+     *
+     * @param key The key of the string to translate, defined in slicer's i18n files (e.g. "menu.file", ...).
+     * @param args Optional arguments to format the translated string with, if it contains placeholders.
+     * @returns The translated and formatted string.
+     */
+    t(key: string, ...args: any[]): string;
+
+    /**
+     * Registers a new translation for a specific locale, allowing scripts to provide their own localized strings.
+     *
+     * If a translation for the same locale and key already exists, it will be overwritten by the new value.
+     * If the locale does not exist yet, it will be created and the translation will be added to it.
+     *
+     * @param locale The locale to register the translation for, represented as a string (e.g. "en", "es", etc.).
+     * @param key The key of the string to register the translation for, can be any string but should ideally follow the same format as keys in slicer's i18n files (e.g. "menu.file", ...).
+     * @param value The translated string in the specified locale.
+     */
+    add(locale: string, key: string, value: string): void;
+
+    /**
+     * Removes a translation for a specific locale and key.
+     *
+     * If the translation does not exist, this function does nothing.
+     * If the locale becomes empty after removing the translation, it will be removed as well.
+     *
+     * @param locale The locale of the translation to remove, represented as a string (e.g. "en", "es", etc.).
+     * @param key The key of the translation to remove.
+     */
+    remove(locale: string, key: string): void;
+}
+
+/**
  * The context in which a script is executed, providing access to the editor, disassembler, and workspace contexts,
  * as well as event handling capabilities.
  */
@@ -418,28 +630,32 @@ export interface ScriptContext {
     /**
      * The script associated with this context.
      */
-    script: Script;
+    readonly script: Script;
     /**
      * The parent context, or `null` if this is the root context.
      */
-    parent: ScriptContext | null;
+    readonly parent: ScriptContext | null;
 
     /**
      * The editor context, which allows interaction with the tabs in the UI.
      */
-    editor: EditorContext;
+    readonly editor: EditorContext;
     /**
      * The disassembler context, which allows interaction with the available disassemblers.
      */
-    disasm: DisassemblerContext;
+    readonly disasm: DisassemblerContext;
     /**
      * The workspace context, which allows interaction with the entries in the workspace.
      */
-    workspace: WorkspaceContext;
+    readonly workspace: WorkspaceContext;
     /**
      * The mapping context, which allows loading and exporting mappings in supported formats.
      */
-    mapping: MappingContext;
+    readonly mapping: MappingContext;
+    /**
+     * The internationalization context, which allows translating strings based on the user's locale and registering new translations.
+     */
+    readonly i18n: I18NContext;
 
     /**
      * Adds an event listener for the specified event type.
